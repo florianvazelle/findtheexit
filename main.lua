@@ -1,4 +1,5 @@
 require "game.entities.player"
+require "game.entities.mob"
 
 require "game.states.move"
 require "game.states.fight"

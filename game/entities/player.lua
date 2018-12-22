@@ -2,7 +2,7 @@ Player = {}
 Player.new = function(x, y)
   local self = {}
 
-  local spritePlayer = love.graphics.newImage("assets/images/enemy1.png")
+  local spritePlayer = love.graphics.newImage("assets/images/pikeman.png")
   self.image = spritePlayer
   self.x = x
   self.y = y
@@ -13,7 +13,6 @@ Player.new = function(x, y)
   self.lastMoveTime = 0
 
   self.update = function(self)
-    -- 96 pixels per second
     local speed = 16
     local goalX, goalY = self.x, self.y
 

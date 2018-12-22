@@ -33,7 +33,7 @@ function move.load()
     player.x, player.y = actualX, actualY
 
     if love.math.random() > 0.98 then
-      --change_state(fight)
+      change_state(fight)
     end
   end
 
