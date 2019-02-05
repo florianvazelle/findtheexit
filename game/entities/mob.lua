@@ -13,6 +13,8 @@ Mob.new = function(level)
   self.image = love.graphics.newImage("assets/images/" .. self.name .. ".png")
   self.x = 0
   self.y = 0
+  self.w = 16
+  self.h = 16
   self.r = 0
   self.sx = 3
 

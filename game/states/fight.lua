@@ -1,3 +1,4 @@
+--palette http://paletton.com/#uid=13a1j0k18O17rzm4NFO2nx-35tf
 fight = {}
 
 function fight.load()
@@ -109,10 +110,20 @@ function fight.resize(width, height)
 
   mob.x = mob_box.x
   mob.y = mob_box.y
-  mob.healthbary = (height / 10) * 4
-  mob.healthbarw = 150
-  mob.healthbarh = 20
-  mob.d = mob.healthbarw / mob.health
+
+  -- Data to show info of mob
+  dataDrawMob = {}
+  local offset = 4
+  dataDrawMob.namey = mob.y + mob.h * mob.sx * 2 + offset
+  dataDrawMob.healthbary = dataDrawMob.namey + 14 + offset
+  dataDrawMob.healthbarw = mob.w * mob.sx * 2
+  dataDrawMob.healthbarh = 20
+  dataDrawMob.d = dataDrawMob.healthbarw / mob.health
+
+  local margin = 25
+  dataBackground = {
+    x = width / 5 - margin, y = 0, w = (width / 5) * 3 + margin, h = height
+  }
 end
 
 function drawTextBox(textbox)
@@ -124,13 +135,12 @@ end
 
 function drawMob()
   love.graphics.draw(mob.image, mob.x, mob.y, mob.r, mob.sx)
-  love.graphics.print(firstToUpper(mob.name), mob.x, mob.y + 16 * 6 + 4)
-  --love.graphics.print("Health :", mob.healthx, mob.y)
+  love.graphics.print(firstToUpper(mob.name), mob.x, dataDrawMob.namey)
   love.graphics.setColor(0, 255, 0)
-  love.graphics.rectangle('fill', mob.x, mob.healthbary, mob.d * mob.health, mob.healthbarh)
+  love.graphics.rectangle('fill', mob.x, dataDrawMob.healthbary, dataDrawMob.d * mob.health, dataDrawMob.healthbarh)
   love.graphics.setColor(255, 255, 255)
-  love.graphics.setLineWidth( 2.5 )
-  love.graphics.rectangle('line', mob.x, mob.healthbary, mob.healthbarw, mob.healthbarh)
+  love.graphics.setLineWidth(2.5)
+  love.graphics.rectangle('line', mob.x, dataDrawMob.healthbary, dataDrawMob.healthbarw, dataDrawMob.healthbarh)
 end
 
 function battle(action)
@@ -154,7 +164,6 @@ function battle(action)
 
   if mob.health <= 0 then
     dialogs.text = dialogs.text .. "\n\n" .. firstToUpper(mob.name) .. " dies !"
-    --mob = nil
     change_state(move)
   end
 end

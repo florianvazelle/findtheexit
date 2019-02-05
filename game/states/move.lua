@@ -4,6 +4,9 @@ local bump = require "lib.bump"
 move = {}
 
 function move.load()
+  local step = love.math.random(9, 15)
+  print(step)
+
   local world = bump.newWorld(16)
   map = sti("assets/data/dungeon.lua", {"bump"}) -- Load map file
   map:bump_init(world)
@@ -30,9 +33,10 @@ function move.load()
     local goalX, goalY = player:update()
     local actualX, actualY, cols, len = world:check(player, goalX, goalY)
     world:update(player, actualX, actualY)
+    if not (player.x == actualX and player.y == actualY) then step = step - 1 end
     player.x, player.y = actualX, actualY
 
-    if love.math.random() > 0.98 then
+    if step == 0 then
       change_state(fight)
     end
   end
