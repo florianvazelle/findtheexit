@@ -1,6 +1,8 @@
 require "game.entities.player"
 require "game.entities.mob"
 
+require "game.interfaces.textbox"
+
 require "game.states.move"
 require "game.states.fight"
 
@@ -15,7 +17,7 @@ function love.load()
   mainFont = love.graphics.newFont("assets/fonts/A Goblin Appears!.otf")
   love.graphics.setFont(mainFont)
 
-  change_state(fight)
+  change_state(move)
 end
 
 function love.draw() state.draw() end

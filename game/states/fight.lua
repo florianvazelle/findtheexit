@@ -1,4 +1,3 @@
---palette http://paletton.com/#uid=13a1j0k18O17rzm4NFO2nx-35tf
 fight = {}
 
 function fight.load()
@@ -12,17 +11,8 @@ function fight.load()
   focus = 1
   infocus = false
 
-  dialogs = {
-    x = nil,
-    y = nil,
-    w = nil,
-    h = nil,
-    colors = {
-      background = { 255, 255, 255, 255 },
-      text = { 40, 40, 40, 255 }
-    },
-    text = "A " .. mob.name .. " appears !"
-  }
+  textbox = Textbox.new()
+  textbox:set_text("A " .. firstToUpper(mob.name) .. " appears !")
 
   local width, height = love.window.getMode() -- On récupère la taille de l'écran
   fight.resize(width, height)
@@ -38,7 +28,7 @@ function fight.draw()
   if not infocus then
     -- Show actions
     for i, action in ipairs(actions) do
-      if i == focus then
+      if i == focus and not textbox.show then
         love.graphics.print("> " .. action.label, action.x, action.y)
       else
         love.graphics.print(action.label, action.x, action.y)
@@ -47,7 +37,7 @@ function fight.draw()
   else
     -- Show skills
     for i, skill in ipairs(actions[focus].skills) do
-      if i == skill_focus then
+      if i == skill_focus and not textbox.show then
         love.graphics.print("> " .. skill.label, skill.x, skill.y)
       else
         love.graphics.print(skill.label, skill.x, skill.y)
@@ -55,42 +45,45 @@ function fight.draw()
     end
   end
   -- Show dialogs
-  drawTextBox(dialogs)
+  textbox:draw()
   drawMob()
 end
 
 function fight.keypressed(key)
-  if focus > 0 then
-    if key == "up" then
-      if not infocus and focus > 1 then
-        focus = focus - 1
-      elseif infocus and skill_focus > 1 then
-        skill_focus = skill_focus - 1
-      end
-    elseif key == "down" then
-      if not infocus and focus < table.getn(actions) then
-        focus = focus + 1
-      elseif infocus and skill_focus < table.getn(actions[focus].skills) then
-        skill_focus = skill_focus + 1
-      end
-    elseif key == "return" then
-      if not infocus then
-        skill_focus = 1
-        infocus = true
-      elseif infocus then
-        battle(actions[focus].skills[skill_focus])
+  if textbox.show then
+    textbox:keypressed(key)
+  else
+    if focus > 0 then
+      if key == "up" then
+        if not infocus and focus > 1 then
+          focus = focus - 1
+        elseif infocus and skill_focus > 1 then
+          skill_focus = skill_focus - 1
+        end
+      elseif key == "down" then
+        if not infocus and focus < table.getn(actions) then
+          focus = focus + 1
+        elseif infocus and skill_focus < table.getn(actions[focus].skills) then
+          skill_focus = skill_focus + 1
+        end
+      elseif key == "return" then
+        if not infocus then
+          skill_focus = 1
+          infocus = true
+        elseif infocus then
+          battle(actions[focus].skills[skill_focus])
+          infocus = false
+          --focus = 0
+          skill_focus = 1
+        end
+      elseif key == "escape" then
         infocus = false
-        --focus = 0
-        skill_focus = 1
       end
-    elseif key == "escape" then
-      infocus = false
     end
   end
 end
 
 function fight.resize(width, height)
-  local dialog_box = { x = width / 5, y = (height / 8) * 5, w = (width / 5) * 3, h = (height / 8) * 2 }
   local action_box = { x = width / 5, y = height / 8 }
   local mob_box = { x = (width / 5) * 3, y = (height / 8) * 2 }
 
@@ -103,10 +96,7 @@ function fight.resize(width, height)
     end
   end
 
-  dialogs.x = dialog_box.x
-  dialogs.y = dialog_box.y
-  dialogs.w = dialog_box.w
-  dialogs.h = dialog_box.h
+  textbox:resize(width, height)
 
   mob.x = mob_box.x
   mob.y = mob_box.y
@@ -126,13 +116,6 @@ function fight.resize(width, height)
   }
 end
 
-function drawTextBox(textbox)
-  love.graphics.setColor(unpack(textbox.colors.background))
-  love.graphics.rectangle('line', textbox.x, textbox.y, textbox.w, textbox.h)
-  love.graphics.setColor(unpack(textbox.colors.text))
-  love.graphics.printf(textbox.text, textbox.x + 10, textbox.y + 10, textbox.w, 'left')
-end
-
 function drawMob()
   love.graphics.draw(mob.image, mob.x, mob.y, mob.r, mob.sx)
   love.graphics.print(firstToUpper(mob.name), mob.x, dataDrawMob.namey)
@@ -144,28 +127,30 @@ function drawMob()
 end
 
 function battle(action)
-  dialogs.text = "You use " .. action.label
+  local text = "You use " .. action.label .. ".\n"
 
   local mob_player, isCritical = nil, nil
   local player_effect = love.math.random(action.effect[1], action.effect[2])
 
   if focus == 1 then -- Attack
     mob.hit(player_effect)
-    dialogs.text = dialogs.text .. "\n\nYou inflict " .. player_effect .. " damage."
+    text = text .. "\nYou inflict " .. player_effect .. " damage.\n"
     mob_player, isCritical = mob.attack()
   elseif focus == 2 then -- Defense
     mob_player, isCritical = mob.attack(player_effect)
   end
 
-  dialogs.text = dialogs.text .. "\n\nYou take " .. mob_player .. " damage."
+  text = text .. "\nYou take " .. mob_player .. " damage.\n"
   if isCritical then
-    dialogs.text = dialogs.text .. "\n\nCritical hit !"
+    text = text .. "\n\nCritical hit !"
   end
 
   if mob.health <= 0 then
-    dialogs.text = dialogs.text .. "\n\n" .. firstToUpper(mob.name) .. " dies !"
+    text = text .. "\n" .. firstToUpper(mob.name) .. " dies !\n"
     change_state(move)
   end
+
+  textbox:set_text(text)
 end
 
 function firstToUpper(str)
