@@ -4,6 +4,8 @@ local bump = require "lib.bump"
 move = {}
 
 function move.load()
+  tx, ty, sx, sy = 0, 0, 1, 1
+
   local step = love.math.random(9, 15)
   print(step)
 
@@ -12,7 +14,7 @@ function move.load()
   map:bump_init(world)
 
   -- Get player spawn object
-  local player
+  --local player
   for _, object in pairs(map.objects) do
     if object.name == "Player" then
       player = Player.new(object.x, object.y)
@@ -20,7 +22,7 @@ function move.load()
     end
   end
 
-  map:addCustomLayer("Sprite Layer", 3) -- Create a Custom Layer
+  map:addCustomLayer("Sprite Layer", 14) -- Create a Custom Layer
   -- Add data to Custom Layer
   local spriteLayer = map.layers["Sprite Layer"]
   spriteLayer.sprites = {
@@ -52,6 +54,19 @@ function move.load()
   end
 
   map:removeLayer("Spawn Point") -- Remove unneeded object layer
+
+
+  -- define update function for all room layer
+  local w = love.graphics.getWidth()
+  local h = love.graphics.getHeight()
+
+  for _, layer in pairs(map.layers) do
+    if "Room" == string.sub(layer.name, 0, 4) and not (layer.name == "Rooms") then
+      layer = Room.new(layer, map.objects[layer.name])
+    end
+  end
+
+  move.resize(w, h)
 end
 
 function move.update(dt)
@@ -59,8 +74,34 @@ function move.update(dt)
 end
 
 function move.draw()
-  map:draw()
+  map:draw(tx, ty, sx)
 end
 
 function move.keypressed(key) end
-function move.resize(width, height) end
+
+function move.resize(width, height)
+  -- To determine the best scale to adopt
+  for _, room in pairs(map.objects) do
+    local scaleX = width / room.width
+    if scaleX < sx or sx == 1 then
+      sx = scaleX
+    end
+
+    local scaleY = height / room.height
+    if scaleY < sy or sy == 1 then
+      sy = scaleY
+    end
+  end
+  sx = math.min(sx, sy)
+end
+
+function hit(x, y, box)
+  if x >= box.x
+  and x < box.x + box.width
+  and y >= box.y
+  and y < box.y + box.height then
+    return true;
+  else
+    return false;
+  end
+end

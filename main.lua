@@ -2,6 +2,7 @@ require "game.entities.player"
 require "game.entities.mob"
 
 require "game.interfaces.textbox"
+require "game.interfaces.room"
 
 require "game.states.move"
 require "game.states.fight"
@@ -21,7 +22,19 @@ function love.load()
 end
 
 function love.draw() state.draw() end
-function love.update(dt) state.update(dt) end
+function love.update(dt)
+  if gameIsPaused then return end
+  state.update(dt)
+end
 
 function love.keypressed(key) state.keypressed(key) end
 function love.resize(w, h) state.resize(w, h) end
+
+function love.focus(f)
+  if not f then
+    print("LOST FOCUS")
+  else
+    print("GAINED FOCUS")
+  end
+  gameIsPaused = not f
+end
