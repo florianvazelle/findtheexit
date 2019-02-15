@@ -15,10 +15,12 @@ function move.load()
 
   -- Get player spawn object
   --local player
-  for _, object in pairs(map.objects) do
-    if object.name == "Player" then
-      player = Player.new(object.x, object.y)
-      break
+  if player == nil then
+    for _, object in pairs(map.objects) do
+      if object.name == "Player" then
+        player = Player.new(object.x, object.y)
+        break
+      end
     end
   end
 
